@@ -128,7 +128,7 @@
 #    - A board + multiple hands.
 # for that we use the :func distribute_pot
 
-:class HandStrength  # both verbal (a pair of aces with K87 kicker) and numerical
+:class HandStrength  # both verbal ("a pair of aces with K87 kicker") and numerical
 
 :attr  level
 :attr  tier
