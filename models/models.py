@@ -217,13 +217,63 @@
 """
 
 from abc import ABC, abstractmethod
+from collections import Counter, namedtuple
 from dataclasses import dataclass
 from enum import Enum, IntEnum
 from random import random
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 
 RANKS: list[None | str] = [None, None] + list("23456789TJQKA")
+
+
+class Tier(IntEnum):
+    """ Tiers of Hands """
+    BRONZE = 10
+    SILVER = 20
+    GOLD = 30
+    PLATINUM = 40
+    DIAMOND = 50
+
+
+class Category(IntEnum):
+    """ Category of Hands """
+
+    # Bronze
+    HIGH_CARD = 11
+    ONE_PAIR = 12
+    TWO_PAIR = 13
+    SUITED_PAIR = 14
+    SEMI_SUITED_TWO_PAIR = 15
+
+    # Silver
+    THREE_OF_A_KIND = 21
+    FULL_HOUSE = 22
+    STRAIGHT = 23
+    FLUSH = 24
+    FLUSHED_PAIR = 25
+
+    # Gold
+    SUITED_TWO_PAIR = 31
+    VILLA = 32
+    _1DECK_FULL_HOUSE = 32  # A full house in 1deck poker
+    FOUR_OF_A_KIND = 33
+    FLUSHED_TWO_PAIR = 34
+    SUITED_TRIPS = 35
+
+    # Platinum
+    MANSION = 41
+    FLUSHED_TRIPS = 42
+    CASTLE = 43
+    FIVE_OF_A_KIND = 44
+    STRAIGHT_FLUSH = 45
+
+    # Diamond
+    ROYAL_PALACE = 51
+    ROYAL_GUARD = 52
+    ROYAL_QUADS = 53
+    ROYAL_FLUSH = 54
+    ROYAL_QUINTET = 55
 
 
 class Rank(IntEnum):
@@ -441,7 +491,7 @@ class Card:
     rank: Rank
     suit: Suit
     level: Level | None = None
-    deck_id: uuid4 | None = None
+    deck_id: UUID | None = None
 
 
 class DeckABC(ABC):
@@ -453,7 +503,7 @@ class DeckABC(ABC):
 
     @property
     @abstractmethod
-    def deck_id(self) -> uuid4: ...
+    def deck_id(self) -> UUID: ...
 
 
 class BaseDeck(DeckABC):
@@ -497,6 +547,422 @@ class ShortDeck(BaseDeck):  # a short deck with 36 cards (6-Ace)
             Card(r, s, _id) for r in Rank for s in Suit
         ])
 
-class Hand:
-  """ Hands with one or more playing cards. """
-  pass
+
+class HandABC(ABC):
+    pass
+
+class BaseHand(HandABC):
+    def __init__(self, cards: list[Card], deck_id: UUID) -> None:
+        self.cards = cards
+
+    def __len__(self) -> int:
+        return len(self.cards)
+    
+    def __repr__(self):
+        return f"Hand({", ".join(self.cards[i] for i in range(len(self)))}"
+
+
+class OmahaHand(BaseHand):  # a hand with four playing cards, of which two need to be used
+    def __init__(self, deck: BaseDeck) -> None:
+        super().__init__(deck.deal(4), deck.deck_id)
+
+
+class HoldEmHand(BaseHand):  # a hand with two playing cards
+    def __init__(self, deck: BaseDeck) -> None:
+        super().__init__(deck.deal(4), deck.deck_id)
+
+
+class Board(ABC):
+
+    @abstractmethod
+    def run_it_once() -> None: ...
+
+    @abstractmethod
+    def run_it_twice() -> None: ...
+
+    @abstractmethod
+    def run_it_thrice() -> None: ...
+
+    @abstractmethod
+    def deal_flop() -> None: ...
+
+    @abstractmethod
+    def deal_turn() -> None: ...
+
+    @abstractmethod
+    def deal_river() -> None: ...
+
+
+class BaseBoard(Board):
+    
+    def __init__(self, deck: BaseDeck) -> None:
+        self.cards = []
+        self._deck = deck
+        self._flop_was_dealt = False
+        self._turn_was_dealt = False
+        self._river_was_dealt = False
+
+    def run_it_once(self):
+        if not self._flop_was_dealt:
+            self.deal_flop()
+        if not self._turn_was_dealt:
+            self.deal_turn()
+        if not self._river_was_dealt:
+            self.deal_river()
+
+    def deal_flop(self):
+        if self._turn_was_dealt or self._river_was_dealt:
+            raise ValueError(
+                "Flop cannot be dealt if turn or river has been dealt")
+        self.cards.extend(self._deck.deal(3))
+        self._flop_was_dealt = True
+
+    def deal_turn(self):
+        if not self._flop_was_dealt:
+            raise ValueError(
+                "Turn cannot be dealt if flop was not dealt")
+        if self._river_was_dealt:
+            raise ValueError(
+                "Turn cannot be dealt if river has been dealt")
+        self.cards.extend(self._deck.deal(1))
+        self._turn_was_dealt = True
+
+    def deal_river(self):
+        if not self._flop_was_dealt or not self._turn_was_dealt:
+            raise ValueError(
+                "River cannot be dealt if flop or turn was not dealt")
+        self.cards.extend(self._deck.deal(1))
+        self._river_was_dealt = True
+
+    def __repr__(self):
+        return "Board: " + " ".join(str(card) for card in self.cards)
+
+
+class Board(BaseBoard):
+    def __init__(self, deck: BaseDeck) -> None:
+        super().__init__(deck)
+
+
+class HandStrengthABC(ABC):
+
+    @property
+    @abstractmethod
+    def level(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def tier(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def category(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def group1(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def group2(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def group3(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def group4(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def group5(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def level1(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def level2(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def level3(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def level4(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def level5(self) -> int | None: ...
+
+    @property
+    @abstractmethod
+    def hand_strength_tup(self) -> namedtuple: ...
+
+    @property
+    @abstractmethod
+    def hand_strength_num(self) -> float: ...
+
+    @property
+    @abstractmethod
+    def hand_strength_txt(self) -> namedtuple: ...
+
+
+class BaseHandStrength(HandStrengthABC):
+
+    def __init__(self, hand: BaseHand) -> None:
+        self._hand_strength_tup = BaseHandStrengthEvaluator(hand)
+
+    @property
+    def level(self) -> int | None:
+        return self.hand_strength_tup["level"]
+
+    @property
+    def tier(self) -> int | None:
+        return self.hand_strength_tup["tier"]
+
+    @property
+    def category(self) -> int | None:
+        return self.hand_strength_tup["category"]
+
+    @property
+    def group1(self) -> int | None:
+        return self.hand_strength_tup["group1"]
+
+    @property
+    def group2(self) -> int | None:
+        return self.hand_strength_tup["group2"]
+
+    @property
+    def group3(self) -> int | None:
+        return self.hand_strength_tup["group3"]
+
+    @property
+    def group4(self) -> int | None:
+        return self.hand_strength_tup["group4"]
+
+    @property
+    def group5(self) -> int | None:
+        return self.hand_strength_tup["group5"]
+
+    @property
+    def level1(self) -> int | None:
+        return self.hand_strength_tup["level1"]
+
+    @property
+    def level2(self) -> int | None:
+        return self.hand_strength_tup["level2"]
+
+    @property
+    def level3(self) -> int | None:
+        return self.hand_strength_tup["level3"]
+
+    @property
+    def level4(self) -> int | None:
+        return self.hand_strength_tup["level4"]
+
+    @property
+    def level5(self) -> int | None:
+        return self.hand_strength_tup["level5"]
+
+    @property
+    def hand_strength_tup(self) -> namedtuple:
+        return self._hand_strength_tup
+
+    @property
+    def hand_strength_num(self) -> float:
+        return NotImplemented
+
+    @property
+    def hand_strength_txt(self) -> namedtuple:
+        return NotImplemented
+
+
+
+class HandStrengthEvaluator(ABC):
+
+    @abstractmethod
+    def evaluate_hand() -> ...: ...
+
+
+HandStrengthTup = namedtuple(
+    "HandStrengthTup",
+    ["level", "tier", "category", "group1", "group2", "group3", "group4",
+     "group5", "level1", "level2", "level3", "level4", "level5"],
+    defaults = [None] * 13
+)
+
+
+class BaseHandStrengthEvaluator(HandStrengthEvaluator):
+
+    def evaluate_five_level_cards(cards: list[Card]) -> namedtuple:
+
+        level = min(card.level.value for card in cards)
+
+        ranks = sorted([card.rank.value for card in cards], reverse=True)
+        suits = [card.suit for card in cards]
+        count = Counter(ranks)
+        counts = sorted(count.values(), reverse=True)
+
+        is_flush = len(set(suits)) == 1
+        is_straight = ranks == list(range(ranks[0], ranks[0] - 5, -1))
+        
+        # Handle wheel straight (A-2-3-4-5)
+        if ranks == [14, 5, 4, 3, 2]:
+            is_straight = True
+            ranks = [5, 4, 3, 2, 1]
+
+        if is_flush and is_straight:
+
+            if ranks[0] == 14:
+
+                # Royal Flush
+                return HandStrengthTup(
+                    level=level - 2, 
+                    tier=4,
+                    category=4
+                    )
+            
+            # Straight Flush
+            return HandStrengthTup(
+                level=level - 2,
+                tier=3,
+                category=4
+                )
+        
+        if counts == [4, 1]:
+
+            four = [r for r, c in count.items() if c == 4]
+            kicker = [r for r in ranks if r not in four]
+
+            # Four of a Kind
+            return HandStrengthTup(
+                level=level - 2,
+                tier=2,
+                category=2,
+                group1=four[0] - 2,
+                group2=kicker[0] - 2,
+                level5=...)
+        
+        if counts == [3, 2]:
+
+            triple = [r for r, c in count.items() if c == 3]
+            pair = [r for r, c in count.items() if c == 2]
+
+            # Full House
+            return HandStrengthTup(
+                level=level - 2,
+                tier=2,
+                category=1,
+                group1=triple[0] - 2,
+                group2=pair[0] - 2,
+                level1=...,
+                level2=...,
+                level3=...,
+                level4=...,
+                level5=...
+                )
+        
+        if is_flush:
+            
+            # Flush
+            return HandStrengthTup(
+                level=level - 2,
+                tier=1,
+                category=3,
+                group1=ranks[0] - 2,
+                group2=ranks[1] - 2,
+                group3=ranks[2] - 2,
+                group4=ranks[3] - 2,
+                group5=ranks[4] - 2,
+            )
+
+        if is_straight:
+
+            # Straight
+            return HandStrengthTup(
+                level=level - 2,
+                tier=1,
+                category=2,
+                group1=ranks[0],
+                level1=...,
+                level2=...,
+                level3=...,
+                level4=...,
+                level5=...
+            )
+        if counts == [3, 1, 1]:
+
+            triple = [r for r, c in count.items() if c == 3]
+            kickers = [r for r in ranks if r not in triple]
+
+            # Three of a Kind
+            return HandStrengthTup(
+                level=level - 2,
+                tier=1,
+                category=0,
+                group1=triple[0],
+                group2=kickers[0],
+                group3=kickers[1],
+                level1=...,
+                level2=...,
+                level3=...,
+                level4=...,
+                level5=...
+            )
+
+        if counts == [2, 2, 1]:
+
+            pairs = sorted([r for r, c in count.items() if c == 2], reverse=True)
+            kicker = [r for r in ranks if r not in pairs]
+
+            # Two Pair
+            return HandStrengthTup(
+                level=level - 2,
+                tier=0,
+                category=2,
+                group1=pairs[0],
+                group2=pairs[2],
+                group3=kicker[0],
+                level1=...,
+                level2=...,
+                level3=...,
+                level4=...,
+                level5=...
+            )
+
+        if counts == [2, 1, 1, 1]:
+
+            pair = [r for r, c in count.items() if c == 2]
+            kickers = [r for r in ranks if r not in pair]
+            return HandStrengthTup(
+                level=level - 2,
+                tier=0,
+                category=1,
+                group1=pair[0],
+                group2=kickers[0],
+                group3=kickers[1],
+                group4=kickers[2],
+                level1=...,
+                level2=...,
+                level3=...,
+                level4=...,
+                level5=...
+            )
+        return HandStrengthTup(
+            level=level - 2,
+            tier=0,
+            category=0,
+            group1=ranks[0],
+            group2=ranks[1],
+            group3=ranks[2],
+            group4=ranks[3],
+            group5=ranks[4],
+            level1=...,
+            level2=...,
+            level3=...,
+            level4=...,
+            level5=...
+            )
