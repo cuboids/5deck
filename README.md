@@ -1,2 +1,6 @@
 # 5deck
-5 Deck Poker
+
+Includes:
+
+- Five Deck Poker
+- Level Poker
