@@ -220,11 +220,15 @@ from abc import ABC, abstractmethod
 from collections import Counter, namedtuple
 from dataclasses import dataclass
 from enum import Enum, IntEnum
-from random import random
+import random
 from uuid import UUID, uuid4
 
 
 RANKS: list[None | str] = [None, None] + list("23456789TJQKA")
+LEVELS: list[None | str] = [None, None] + [
+    "", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹",
+    "¹⁰", "¹¹", "¹²", "¹³", "¹⁴"
+]
 
 
 class Tier(IntEnum):
@@ -465,8 +469,8 @@ class InfLevel(IntEnum):
         return str(self.value)
 
 
-LEVEL_WEIGHTS: list[int] = [0, 0] + [2 ** n for n in range(len(Level), 0, -1)]
-INF_LEVEL_WEIGHTS: list[int] = [0, 0] + [2 ** n for n in range(len(InfLevel), 0, -1)]
+LEVEL_WEIGHTS: list[int] = [2 ** n for n in range(len(Level), 0, -1)]
+INF_LEVEL_WEIGHTS: list[int] = [2 ** n for n in range(len(InfLevel), 0, -1)]
 
 
 class ShortLevel(IntEnum):
@@ -493,6 +497,11 @@ class Card:
     level: Level | None = None
     deck_id: UUID | None = None
 
+    def __repr__(self):
+        if self.level is None:
+            return f"{self.rank}{self.suit}"
+        return f"{self.rank}{self.suit}{LEVELS[self.level.value]}"
+
 
 class DeckABC(ABC):
     @abstractmethod
@@ -501,15 +510,12 @@ class DeckABC(ABC):
     @abstractmethod
     def deal(self, n: int) -> list[Card]: ...
 
-    @property
-    @abstractmethod
-    def deck_id(self) -> UUID: ...
-
 
 class BaseDeck(DeckABC):
 
     def __init__(self, cards: list[Card]) -> None:
         self.cards = cards
+        self.shuffle()
 
     def shuffle(self) -> None:
         random.shuffle(self.cards)
@@ -526,7 +532,7 @@ class FiveDeck(BaseDeck):
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
         super().__init__([
-            Card(r, s, _id) for _ in range(5) for r in Rank for s in Suit
+            Card(r, s, None, _id) for _ in range(5) for r in Rank for s in Suit
         ])                
 
 
@@ -535,7 +541,7 @@ class StdDeck(BaseDeck):
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
         super().__init__([
-            Card(r, s, _id) for r in Rank for s in Suit
+            Card(r, s, None, _id) for r in Rank for s in Suit
         ])
 
 
@@ -544,12 +550,23 @@ class ShortDeck(BaseDeck):  # a short deck with 36 cards (6-Ace)
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
         super().__init__([
-            Card(r, s, _id) for r in Rank for s in Suit
+            Card(r, s, None, _id) for r in Rank for s in Suit
+        ])
+
+
+class LevelDeck(BaseDeck):
+
+    def __init__(self) -> None:
+        self.deck_id = _id = uuid4()
+        levels = random.choices(list(Level), weights=LEVEL_WEIGHTS, k=52)
+        super().__init__([
+            Card(r, s, levels[i], _id) for i, (r, s) in enumerate((r, s) for r in Rank for s in Suit)
         ])
 
 
 class HandABC(ABC):
     pass
+
 
 class BaseHand(HandABC):
     def __init__(self, cards: list[Card], deck_id: UUID) -> None:
@@ -559,7 +576,7 @@ class BaseHand(HandABC):
         return len(self.cards)
     
     def __repr__(self):
-        return f"Hand({", ".join(self.cards[i] for i in range(len(self)))}"
+        return f"Hand({", ".join(str(self.cards[i]) for i in range(len(self.cards)))}"
 
 
 class OmahaHand(BaseHand):  # a hand with four playing cards, of which two need to be used
@@ -569,7 +586,7 @@ class OmahaHand(BaseHand):  # a hand with four playing cards, of which two need 
 
 class HoldEmHand(BaseHand):  # a hand with two playing cards
     def __init__(self, deck: BaseDeck) -> None:
-        super().__init__(deck.deal(4), deck.deck_id)
+        super().__init__(deck.deal(2), deck.deck_id)
 
 
 class Board(ABC):
@@ -610,6 +627,12 @@ class BaseBoard(Board):
         if not self._river_was_dealt:
             self.deal_river()
 
+    def run_it_twice(self):
+        return NotImplemented
+    
+    def run_it_thrice():
+        return NotImplemented
+
     def deal_flop(self):
         if self._turn_was_dealt or self._river_was_dealt:
             raise ValueError(
@@ -638,7 +661,7 @@ class BaseBoard(Board):
         return "Board: " + " ".join(str(card) for card in self.cards)
 
 
-class Board(BaseBoard):
+class StdBoard(BaseBoard):
     def __init__(self, deck: BaseDeck) -> None:
         super().__init__(deck)
 
@@ -783,6 +806,7 @@ class BaseHandStrength(HandStrengthABC):
 
 class HandStrengthEvaluator(ABC):
 
+    @staticmethod
     @abstractmethod
     def evaluate_hand() -> ...: ...
 
@@ -797,13 +821,14 @@ HandStrengthTup = namedtuple(
 
 class BaseHandStrengthEvaluator(HandStrengthEvaluator):
 
-    def evaluate_five_level_cards(cards: list[Card]) -> namedtuple:
+    @staticmethod
+    def evaluate_hand(cards: list[Card]) -> namedtuple:
 
         level = min(card.level.value for card in cards)
 
         cards = sorted(
             [card for card in cards],
-            lambda c: (c.rank.value, c.level.value, c.suit.value),
+            key=lambda c: (c.rank.value, c.level.value, c.suit.value),
             reverse=True
         )
 
@@ -851,7 +876,7 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 category=2,
                 group1=four[0] - 2,
                 group2=kicker[0] - 2,
-                level5=level[4] - 2)
+                level5=levels[4] - 2)
         
         if counts == [3, 2]:
 
@@ -865,9 +890,9 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 category=1,
                 group1=triple[0] - 2,
                 group2=pair[0] - 2,
-                level1=level[0] - 2,
-                level4=level[3] - 2,
-                level5=level[4] - 2
+                level1=levels[0] - 2,
+                level4=levels[3] - 2,
+                level5=levels[4] - 2
                 )
         
         if is_flush:
@@ -891,12 +916,12 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 level=level - 2,
                 tier=1,
                 category=2,
-                group1=ranks[0],
-                level1=level[0] - 2,
-                level2=level[1] - 2,
-                level3=level[2] - 2,
-                level4=level[3] - 2,
-                level5=level[4] - 2
+                group1=ranks[0] - 2,
+                level1=levels[0] - 2,
+                level2=levels[1] - 2,
+                level3=levels[2] - 2,
+                level4=levels[3] - 2,
+                level5=levels[4] - 2
             )
         if counts == [3, 1, 1]:
 
@@ -908,9 +933,9 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 level=level - 2,
                 tier=1,
                 category=0,
-                group1=triple[0],
-                group2=kickers[0],
-                group3=kickers[1],
+                group1=triple[0] - 2,
+                group2=kickers[0] - 2,
+                group3=kickers[1] - 2,
                 level1=levels[0] - 2,
                 level4=levels[3] - 2,
                 level5=levels[4] - 2
@@ -926,9 +951,9 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 level=level - 2,
                 tier=0,
                 category=2,
-                group1=pairs[0],
-                group2=pairs[2],
-                group3=kicker[0],
+                group1=pairs[0] - 2,
+                group2=pairs[1] - 2,
+                group3=kicker[0] - 2,
                 level1=levels[0] - 2,
                 level2=levels[1] - 2,
                 level3=levels[2] - 2,
@@ -940,32 +965,50 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
 
             pair = [r for r, c in count.items() if c == 2]
             kickers = [r for r in ranks if r not in pair]
+
+            # One Pair
             return HandStrengthTup(
                 level=level - 2,
                 tier=0,
                 category=1,
-                group1=pair[0],
-                group2=kickers[0],
-                group3=kickers[1],
-                group4=kickers[2],
-                level1=level[0] - 2,
-                level2=level[1] - 2,
-                level3=level[2] - 2,
-                level4=level[3] - 2,
-                level5=level[4] - 2
+                group1=pair[0] - 2,
+                group2=kickers[0] - 2,
+                group3=kickers[1] - 2,
+                group4=kickers[2] - 2,
+                level1=levels[0] - 2,
+                level2=levels[1] - 2,
+                level3=levels[2] - 2,
+                level4=levels[3] - 2,
+                level5=levels[4] - 2
             )
+        
+        # High Card
         return HandStrengthTup(
             level=level - 2,
             tier=0,
             category=0,
-            group1=ranks[0],
-            group2=ranks[1],
-            group3=ranks[2],
-            group4=ranks[3],
-            group5=ranks[4],
-            level1=level[0] - 2,
-            level2=level[1] - 2,
-            level3=level[2] - 2,
-            level4=level[3] - 2,
-            level5=level[4] - 2
+            group1=ranks[0] - 2,
+            group2=ranks[1] - 2,
+            group3=ranks[2] - 2,
+            group4=ranks[3] - 2,
+            group5=ranks[4] - 2,
+            level1=levels[0] - 2,
+            level2=levels[1] - 2,
+            level3=levels[2] - 2,
+            level4=levels[3] - 2,
+            level5=levels[4] - 2
             )
+
+
+def main():
+    l = LevelDeck()
+    b = StdBoard(l)
+    b.run_it_once()
+    print(b.cards)
+    bhse = BaseHandStrengthEvaluator()
+    hs = bhse.evaluate_hand(b.cards)
+    print(hs)
+
+
+if __name__ == "__main__":
+    main()
