@@ -164,14 +164,14 @@ class Hand:
   pass
 
 @lru_cache
-def hand_evaluation(hand: Hand, fivedeck: bool = False, shortdeck: bool = False) -> HandEvaluation:
+def hand_evaluation(hand: Hand) -> HandEvaluation:
   """ Hand evaluation. """
   
-  if fivedeck and shortdeck:
+  if hand.fivedeck and hand.shortdeck:
     raise ValueError("Fivedeck shortdeck not supported.")
-  if fivedeck:
+  if hand.fivedeck:
     return hand_evaluation_fivedeck(hand: Hand)
-  if shortdeck:
+  if hand.shortdeck:
     return hand_evaluation_shortdeck(hand: Hand)
   ...
 
