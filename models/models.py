@@ -171,6 +171,7 @@ class Rank(IntEnum):
 
 
 class Hand:
+  """ Hands with one or more playing cards. """
   pass
 
 
