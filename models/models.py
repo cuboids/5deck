@@ -29,67 +29,113 @@
 
 # card
 
-:class Card  # a card has rank, suit, and level | None
+:abcls CardABC(ABC)  # a card has rank, suit, and level | None
+
+:class BaseCard(CardABC)
+
+:class Card(BaseCard)
 
 # deck
 
-:class Deck
+:abcls DeckABC(ABC)
 
-:class ShortDeck(Deck)  # a short deck with 36 cards (6-Ace)
+:class BaseDeck(DeckABC)
 
-:class InfDeck(Deck)  # a deck with infinitely many cards, with InfLevels
+:class StdDeck(BaseDeck)
+
+:class ShortDeck(BaseDeck)  # a short deck with 36 cards (6-Ace)
+
+:class InfDeck(BaseDeck)  # a deck with infinitely many cards, with InfLevels
 
 # hand
 
-:class Hand
+:abcls HandABC(ABC)
 
-:class OmahaHand(Hand)  # a hand with four playing cards, of which two need to be used
+:class BaseHand(HandABC)
 
-:class Omaha5Hand(Hand)
+:class OmahaHand(BaseHand)  # a hand with four playing cards, of which two need to be used
 
-:class Omaha6Hand(Hand)
+:class Omaha5Hand(BaseHand)
 
-:class HoldEmHand(Hand)  # a hand with two playing cards
+:class Omaha6Hand(BaseHand)
+
+:class HoldEmHand(BaseHand)  # a hand with two playing cards
 
 # board
 
-:class Board  # a board with 0-5 x 1-3 = 0-15 playing cards
+:abcls BoardABC(ABC)  # a board with 0-5 x 1-3 = 0-15 playing cards
 # 1-3: run it once, twice or thrice.
+
+:class BaseBoard(BoardABC)
+
+:class Board(BaseBoard)
 
 # game
 
-:class Game
+:abcls GameABC(ABC)
 
-:class PLO(Game)
+:class BaseGame(GameABC)
+
+:class PLO(BaseGame)
 
 :class FiveDeckPLO(PLO)
 
-:class NLH(Game)
+:class NLH(BaseGame)
 
-:class LevelNLH(NLH)
+:class LevelNLH(BaseGame)
 
 # Later we might add FiveDeckNLH, LevelPLO, InfNLH, and InfPLO
 # as well as short deck variants with 5 decks, levels, or both.
 
 # player
 
-:class Player
+:abcls PlayerABC(ABC)
 
-:class AIPlayer(Player)  # for AI to be a player
+:class BasePlayer(PlayerABC)
+
+:class AIPlayer(BasePlayer)  # for AI to be a player
+
+:class HumanPlayer(BasePlayer)
+
+:class RandomPlayer(BasePlayer)  # always chooses a random action.
+
+:class AlwaysCallPlayer(BasePlayer)  # always checks or calls.
 
 # chips
 
-:class Chips
+:abcls ChipsABC(ABC)
+
+:class BaseChips(ChipsABC)
+
+:class Chips(BaseChips)
 
 # pot
 
-:class Pot
+:abcls PotABC(ABC)
+
+:class BasePot(PotABC)
+
+:class Pot(BasePot)
 
 # round
 
-:class Round  # an entire round, from preflop to showdown
+:abcls RoundABC(ABC)  # an entire round, from preflop to showdown
+
+:class BaseRound(ABC)
+
+:class Round(BaseRound)
 
 # hand evaluation
+
+:abcls HandEvaluatorABC(ABC)
+
+:class BaseHandEvaluator(HandEvaluatorABC)
+
+:class HandEvaluator(BaseHandEvaluator)
+
+:class FiveDeckHandEvaluator(HandEvaluator)
+
+:class LevelHandEvaluator(HandEvaluator)
 
 @lru_cache
 :func hand_evaluation
@@ -135,7 +181,9 @@
 #    - A board + multiple hands.
 # for that we use the :func distribute_pot
 
-:class HandStrength  # both verbal ("a pair of aces with K87 kicker") and numerical
+:class HandStrengthABC(ABC)  # both verbal ("a pair of aces with K87 kicker") and numerical
+
+:class BaseHandStrength(HandStrengthABC)
 
 :attr  level
 :attr  tier
@@ -154,7 +202,21 @@
 :attr  hand_strength_num
 :attr  hand_strength   # named tuple (with textual values)
 
+:class HandStrength(BaseHandStrength)
+
 :func distribute_pot
+
+# rule set
+
+:abcls RuleSetABC(ABC)
+
+:class BaseRuleSet(RuleSetABC)
+
+:class RuleSet(BaseRuleSet)
+
+:class FiveDeckRuleSet(BaseRuleSet)
+
+:class LevelRuleSet(BaseRuleSet)
 
 """
 
