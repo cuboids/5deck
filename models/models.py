@@ -29,11 +29,7 @@
 
 # card
 
-:abcls CardABC(ABC)  # a card has rank, suit, and level | None
-
-:class BaseCard(CardABC)
-
-:class Card(BaseCard)
+:class BaseCard(CardABC)  # a card has rank, suit, and optional level and deck_id
 
 # deck
 
@@ -220,17 +216,285 @@
 
 """
 
+from abc import ABC, abstractmethod
+from dataclass import dataclass
 from enum import IntEnum
 from lru_cache import lru_cache
+from uuid import uuid4
+
+
+RANKS: list[None | str] = [None, None] + list("23456789TJQKA")
 
 
 class Rank(IntEnum):
-  """ Ranks of playing cards. """
-  ...
+    """ Ranks of playing cards. """
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
+
+    def __str__(self):
+        return RANKS[self.value]
 
 
-...
+class ShortRank(IntEnum):
+    """ Ranks of playing cards (short deck). """
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    JACK = 11
+    QUEEN = 12
+    KING = 13
+    ACE = 14
 
+    def __str__(self):
+        return RANKS[self.value]
+
+
+class Suit(Enum):
+    """ Suits of playing cards. """
+    CLUBS = '♣'
+    DIAMONDS = '♦'
+    HEARTS = '♥'
+    SPADES = '♠'
+
+    def __str__(self):
+        return self.value
+
+
+class Level(IntEnum):
+    """ Levels of playing cards. """
+  
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    ELEVEN = 11
+    TWELVE = 12
+    THIRTEEN = 13
+    FOURTEEN = 14
+
+    def __str__(self):
+        return str(self.value)
+
+
+class InfLevel(IntEnum):
+    """ "Infinite" Levels of playing cards.
+    
+    With 110 levels, the chance of exceeding the highest 
+    level is smaller than the chance of the Sun not rising
+    tomorrow, even with a trillion cards generated...
+    """
+  
+    TWO = 2
+    THREE = 3
+    FOUR = 4
+    FIVE = 5
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    ELEVEN = 11
+    TWELVE = 12
+    THIRTEEN = 13
+    FOURTEEN = 14
+    FIFTEEN = 15
+    SIXTEEN = 16
+    SEVENTEEN = 17
+    EIGHTEEN = 18
+    NINETEEN = 19
+    TWENTY = 20
+    TWENTYONE = 21
+    TWENTYTWO = 22
+    TWENTYTHREE = 23
+    TWENTYFOUR = 24
+    TWENTYFIVE = 25
+    TWENTYSIX = 26
+    TWENTYSEVEN = 27
+    TWENTYEIGHT = 28
+    TWENTYNINE = 29
+    THIRTY = 30
+    THIRTYONE = 31
+    THIRTYTWO = 32
+    THIRTYTHREE = 33
+    THIRTYFOUR = 34
+    THIRTYFIVE = 35
+    THIRTYSIX = 36
+    THIRTYSEVEN = 37
+    THIRTYEIGHT = 38
+    THIRTYNINE = 39
+    FORTY = 40
+    FORTYONE = 41
+    FORTYTWO = 42
+    FORTYTHREE = 43
+    FORTYFOUR = 44
+    FORTYFIVE = 45
+    FORTYSIX = 46
+    FORTYSEVEN = 47
+    FORTYEIGHT = 48
+    FORTYNINE = 49
+    FIFTY = 50
+    FIFTYONE = 51
+    FIFTYTWO = 52
+    FIFTYTHREE = 53
+    FIFTYFOUR = 54
+    FIFTYFIVE = 55
+    FIFTYSIX = 56
+    FIFTYSEVEN = 57
+    FIFTYEIGHT = 58
+    FIFTYNINE = 59
+    SIXTY = 60
+    SIXTYONE = 61
+    SIXTYTWO = 62
+    SIXTYTHREE = 63
+    SIXTYFOUR = 64
+    SIXTYFIVE = 65
+    SIXTYSIX = 66
+    SIXTYSEVEN = 67
+    SIXTYEIGHT = 68
+    SIXTYNINE = 69
+    SEVENTY = 70
+    SEVENTYONE = 71
+    SEVENTYTWO = 72
+    SEVENTYTHREE = 73
+    SEVENTYFOUR = 74
+    SEVENTYFIVE = 75
+    SEVENTYSIX = 76
+    SEVENTYSEVEN = 77
+    SEVENTYEIGHT = 78
+    SEVENTYNINE = 79
+    EIGHTY = 80
+    EIGHTYONE = 81
+    EIGHTYTWO = 82
+    EIGHTYTHREE = 83
+    EIGHTYFOUR = 84
+    EIGHTYFIVE = 85
+    EIGHTYSIX = 86
+    EIGHTYSEVEN = 87
+    EIGHTYEIGHT = 88
+    EIGHTYNINE = 89
+    NINETY = 90
+    NINETYONE = 91
+    NINETYTWO = 92
+    NINETYTHREE = 93
+    NINETYFOUR = 94
+    NINETYFIVE = 95
+    NINETYSIX = 96
+    NINETYSEVEN = 97
+    NINETYEIGHT = 98
+    NINETYNINE = 99
+    ONEHUNDRED = 100
+    ONEHUNDREDONE = 101
+    ONEHUNDREDTWO = 102
+    ONEHUNDREDTHREE = 103
+    ONEHUNDREDFOUR = 104
+    ONEHUNDREDFIVE = 105
+    ONEHUNDREDSIX = 106
+    ONEHUNDREDSEVEN = 107
+    ONEHUNDREDEIGHT = 108
+    ONEHUNDREDNINE = 109
+    ONEHUNDREDTEN = 110
+
+    def __str__(self):
+        return str(self.value)
+
+
+LEVEL_WEIGHTS: list[int] = [0, 0] + [2 ** n for n in range(len(Level), 0, -1)]
+INF_LEVEL_WEIGHTS: list[int] = [0, 0] + [2 ** n for n in range(len(InfLevel), 0, -1)]
+
+
+class ShortLevel(IntEnum):
+    """ Short Deck Levels of playing cards. """
+
+    SIX = 6
+    SEVEN = 7
+    EIGHT = 8
+    NINE = 9
+    TEN = 10
+    ELEVEN = 11
+    TWELVE = 12
+    THIRTEEN = 13
+    FOURTEEN = 14
+
+    def __str__(self):
+        return str(self.value)
+
+
+@dataclass(frozen=True)
+class BaseCard:
+    rank: Rank
+    suit: Suit
+    level: Level | None = None
+    deck_id: uuid4 | None = None
+
+
+class DeckABC(ABC):
+    @abstractmethod
+    def shuffle(self) -> None: ...
+
+    @abstractmethod
+    def deal(self, n: int) -> list[Card]: ...
+
+    @property
+    @abstractmethod
+    def deck_id(self) -> uuid4: ...
+
+
+class BaseDeck(DeckABC):
+
+    def __init__(self, cards: list[BaseCard]) -> None:
+        self.cards = cards
+
+    def shuffle(self) -> None:
+        random.shuffle(self.cards)
+
+    def deal(self, n: int) -> list[Card]:
+        return [self.cards.pop() for _ in range(n)]
+
+    def __len__() -> int:
+        return len(self.cards)
+
+
+class FiveDeck(BaseDeck):
+
+    def __init__(self) -> None:
+        self.deck_id = _id = uuid4()
+        super().__init__([
+            BaseCard(r, s, _id) for _ in range(5) for r in Rank for s in Suit
+        ])                
+
+class StdDeck(BaseDeck)
+
+    def __init__(self) -> None:
+        self.deck_id = _id = uuid4()
+        super().__init__([
+            BaseCard(r, s, _id) for r in Rank for s in Suit
+        ])
+
+class ShortDeck(BaseDeck)  # a short deck with 36 cards (6-Ace)
+
+    def __init__(self) -> None:
+        self.deck_id = _id = uuid4()
+        super().__init__([
+            BaseCard(r, s, _id) for r in Rank for s in Suit
+        ])
 
 class Hand:
   """ Hands with one or more playing cards. """
