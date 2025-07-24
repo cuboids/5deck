@@ -25,7 +25,7 @@
 
 :class InfLevel(Level)  # allows arbitrariliy high levels
 
-:class ShortLevel(Level)  # levels 6-14 only for short deck
+:class ShortLevel(Level)  # levels 6-14 only (short deck)
 
 # card
 
@@ -35,7 +35,7 @@
 
 :class Deck
 
-:class ShortDeck(Deck)  # a short deck with 36 cards: 6-Ace
+:class ShortDeck(Deck)  # a short deck with 36 cards (6-Ace)
 
 :class InfDeck(Deck)  # a deck with infinitely many cards, with InfLevels
 
@@ -43,7 +43,11 @@
 
 :class Hand
 
-:class OmahaHand(Hand)  # a hand with four playing cards
+:class OmahaHand(Hand)  # a hand with four playing cards, of which two need to be used
+
+:class Omaha5Hand(Hand)
+
+:class Omaha6Hand(Hand)
 
 :class HoldEmHand(Hand)  # a hand with two playing cards
 
