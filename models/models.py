@@ -29,7 +29,7 @@
 
 # card
 
-:class Card(StrEnum)  # a card has rank, suit, and level | None
+:class Card  # a card has rank, suit, and level | None
 
 # deck
 
