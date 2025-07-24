@@ -859,8 +859,6 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 group1=triple[0] - 2,
                 group2=pair[0] - 2,
                 level1=...,
-                level2=...,
-                level3=...,
                 level4=...,
                 level5=...
                 )
@@ -907,8 +905,6 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 group2=kickers[0],
                 group3=kickers[1],
                 level1=...,
-                level2=...,
-                level3=...,
                 level4=...,
                 level5=...
             )
