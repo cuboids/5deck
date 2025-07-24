@@ -801,7 +801,14 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
 
         level = min(card.level.value for card in cards)
 
-        ranks = sorted([card.rank.value for card in cards], reverse=True)
+        cards = sorted(
+            [card for card in cards],
+            lambda c: (c.rank.value, c.level.value, c.suit.value),
+            reverse=True
+        )
+
+        ranks = [card.rank.value for card in cards]
+        levels = [card.level.value for card in cards]
         suits = [card.suit for card in cards]
         count = Counter(ranks)
         counts = sorted(count.values(), reverse=True)
@@ -844,7 +851,7 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 category=2,
                 group1=four[0] - 2,
                 group2=kicker[0] - 2,
-                level5=...)
+                level5=level[4] - 2)
         
         if counts == [3, 2]:
 
@@ -858,9 +865,9 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 category=1,
                 group1=triple[0] - 2,
                 group2=pair[0] - 2,
-                level1=...,
-                level4=...,
-                level5=...
+                level1=level[0] - 2,
+                level4=level[3] - 2,
+                level5=level[4] - 2
                 )
         
         if is_flush:
@@ -885,11 +892,11 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 tier=1,
                 category=2,
                 group1=ranks[0],
-                level1=...,
-                level2=...,
-                level3=...,
-                level4=...,
-                level5=...
+                level1=level[0] - 2,
+                level2=level[1] - 2,
+                level3=level[2] - 2,
+                level4=level[3] - 2,
+                level5=level[4] - 2
             )
         if counts == [3, 1, 1]:
 
@@ -904,9 +911,9 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 group1=triple[0],
                 group2=kickers[0],
                 group3=kickers[1],
-                level1=...,
-                level4=...,
-                level5=...
+                level1=levels[0] - 2,
+                level4=levels[3] - 2,
+                level5=levels[4] - 2
             )
 
         if counts == [2, 2, 1]:
@@ -922,11 +929,11 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 group1=pairs[0],
                 group2=pairs[2],
                 group3=kicker[0],
-                level1=...,
-                level2=...,
-                level3=...,
-                level4=...,
-                level5=...
+                level1=levels[0] - 2,
+                level2=levels[1] - 2,
+                level3=levels[2] - 2,
+                level4=levels[3] - 2,
+                level5=levels[4] - 2
             )
 
         if counts == [2, 1, 1, 1]:
@@ -941,11 +948,11 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
                 group2=kickers[0],
                 group3=kickers[1],
                 group4=kickers[2],
-                level1=...,
-                level2=...,
-                level3=...,
-                level4=...,
-                level5=...
+                level1=level[0] - 2,
+                level2=level[1] - 2,
+                level3=level[2] - 2,
+                level4=level[3] - 2,
+                level5=level[4] - 2
             )
         return HandStrengthTup(
             level=level - 2,
@@ -956,9 +963,9 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
             group3=ranks[2],
             group4=ranks[3],
             group5=ranks[4],
-            level1=...,
-            level2=...,
-            level3=...,
-            level4=...,
-            level5=...
+            level1=level[0] - 2,
+            level2=level[1] - 2,
+            level3=level[2] - 2,
+            level4=level[3] - 2,
+            level5=level[4] - 2
             )
