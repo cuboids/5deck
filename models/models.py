@@ -114,12 +114,12 @@
 #    - Tier = Diamond (5/5)
 #    - Category = Royal Flush (4/5)
 #    - Groups = None
-#    - Level Groups = None
+#    - Level Groups = [3, 2, 2, 2, 4]
 #
-# (2, 5, 4) = 
+# (2, 5, 4, 3, 2, 2, 2, 4) = 
 # (Level=2, Tier=5, Cat=4, Group1=None, Group2=None,
-#  Group3=None, Group4=None, Group5=None, LGroup1=None,
-#  LGroup2=None, LGroup3=None, LGroup4=None, LGroup5=None)
+#  Group3=None, Group4=None, Group5=None, LGroup1=3,
+#  LGroup2=2, LGroup3=2, LGroup4=2, LGroup5=4)
 #
 # The :func for hand_evaluation should work on:
 #    - A list of one or more cards
@@ -128,7 +128,7 @@
 #    - A board + multiple hands.
 # for that we use the :func distribute_pot
 
-:class HandEvaluation
+:class HandStrength  # both verbal (a pair of aces with K87 kicker) and numerical
 
 :class HandLevel
 
