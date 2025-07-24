@@ -157,11 +157,11 @@ class Hand:
   pass
 
 @lru_cache
-def hand_evaluation(hand: Hand, multideck: bool = False) -> HandEvaluation:
-  if multideck:
-    return hand_evaluation_multideck(hand: Hand)
+def hand_evaluation(hand: Hand, fivedeck: bool = False) -> HandEvaluation:
+  if fivedeck:
+    return hand_evaluation_fivedeck(hand: Hand)
   ...
 
 @lru_cache
-def hand_evaluation_multideck(hand: Hand):
+def hand_evaluation_fivedeck(hand: Hand):
   ...
