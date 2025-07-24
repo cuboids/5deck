@@ -163,6 +163,7 @@ from lru_cache import lru_cache
 
 
 class Rank(IntEnum):
+  """ Ranks of playing cards. """
   ...
 
 
