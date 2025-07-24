@@ -158,10 +158,17 @@
 
 """
 
+from enum import IntEnum
 from lru_cache import lru_cache
+
+
+class Rank(IntEnum):
+  ...
+
 
 class Hand:
   pass
+
 
 @lru_cache
 def hand_evaluation(hand: Hand) -> HandEvaluation:
