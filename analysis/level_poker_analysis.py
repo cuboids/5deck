@@ -25,9 +25,9 @@ we can sort them Top, Upper, Lower, Bottom.
 # Hand: [AA]        #
 # Levels: 6432      #
 #                   #
-# tu% tl% tb%       #
-#     ul% ub%       #
-#         lb%       #
+# tu%               #
+# tl% ul%           #
+# tb% ub% lb%       #
 # # # # # # # # # # #
 
 # # # # # # # # # # #
@@ -41,10 +41,10 @@ we can sort them Top, Upper, Lower, Bottom.
 # Hand: [AKo]       #
 # Levels 6432*5432  #
 #                   #
-# tt% tu% tl% tb%   #
-# ut% uu% ul% ub%   #
-# lt% lu% ll% lb%   #
-# bt% bu% bl% bb%   #
+# tt% ut% lt% bt%   #
+# tu% uu% lu% bu%   #
+# tl% ul% ll% bl%   #
+# tb% ub% lb% bb%   #
 # # # # # # # # # # #
 
 If levels
@@ -54,11 +54,11 @@ ace.
 
 # # # # # # # # # # #
 # Hand: [AA]        #
-# Levels: 2         #  
+# Levels: 2222      #  
 #                   #
-# tu% t̶l̶%̶ t̶l̶%̶       #
-#     t̶l̶%̶ t̶l̶%̶       #
-#         t̶l̶%̶       #
+# tu%               #
+# t̶l̶%̶ u̶l̶%̶           #
+# t̶b̶%̶ u̶b̶%̶ l̶b̶%̶       #
 # # # # # # # # # # #
 
 """
