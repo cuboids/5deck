@@ -98,14 +98,14 @@
 #    - Tier = Bronze (1/5)
 #    - Category = High Card (1/5 in Tier)
 #    - Groups = [Ace, King, 9, 7, deuce]
-#    - Level Groups = [3, 2, 2, 4, 2]
+#    - Levels = [3, 2, 2, 4, 2]
 #
 # These are together represented in a named tuple, e.g.
 #
 # (2, 1, 1, 14, 13, 9, 7, 2, 3, 2, 2, 4, 2) = 
 # (Level=2, Tier=1, Cat=1, Group1=14, Group2=13, Group3=9,
-#  Group4=7, Group5=2, LGroup1=3, LGroup2=2, LGroup3=2,
-#  LGroup4=4, LGroup5=2)
+#  Group4=7, Group5=2, Level1=3, Level2=2, Level3=2,
+#  Level4=4, Level5=2)
 #
 # If a Group or LGroup does not apply, it is None.
 #
@@ -114,12 +114,12 @@
 #    - Tier = Diamond (5/5)
 #    - Category = Royal Flush (4/5)
 #    - Groups = None
-#    - Level Groups = [3, 2, 2, 2, 4]
+#    - Levels = [3, 2, 2, 2, 4]
 #
 # (2, 5, 4, 3, 2, 2, 2, 4) = 
 # (Level=2, Tier=5, Cat=4, Group1=None, Group2=None,
-#  Group3=None, Group4=None, Group5=None, LGroup1=3,
-#  LGroup2=2, LGroup3=2, LGroup4=2, LGroup5=4)
+#  Group3=None, Group4=None, Group5=None, Level1=3,
+#  Level2=2, Level3=2, Level4=2, Level5=4)
 #
 # The :func for hand_evaluation should work on:
 #    - A list of one or more cards
@@ -138,11 +138,11 @@
 :attr  group3
 :attr  group4
 :attr  group5
-:attr  lgroup1
-:attr  lgroup2
-:attr  lgroup3
-:attr  lgroup4
-:attr  lgroup5
+:attr  level1
+:attr  level2
+:attr  level3
+:attr  level4
+:attr  level5
 :attr  hand_strength_tup  # named tuple (with number values)
 :attr  hand_strength_num
 :attr  hand_strength   # named tuple (with textual values)
