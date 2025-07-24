@@ -34,7 +34,10 @@ we can sort them Top, Upper, Lower, Bottom.
 # Hand: [AKs]       #
 # Levels: 6432+3254 #
 #                   #
-# tl% ub% lt% bu%   #
+#         lt%       #
+#             bu%   #
+# tl%               #
+#     ub%           #
 # # # # # # # # # # #
 
 # # # # # # # # # # #
