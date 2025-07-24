@@ -114,12 +114,15 @@
 #    - Tier = Diamond (5/5)
 #    - Category = Royal Flush (4/5)
 #    - Groups = None
-#    - Levels = [3, 2, 2, 2, 4]
+#    - Levels = None
 #
-# (2, 5, 4, 3, 2, 2, 2, 4) = 
+# (2, 5, 4) = 
 # (Level=2, Tier=5, Cat=4, Group1=None, Group2=None,
-#  Group3=None, Group4=None, Group5=None, Level1=3,
-#  Level2=2, Level3=2, Level4=2, Level5=4)
+#  Group3=None, Group4=None, Group5=None, Level1=None,
+#  Level2=None, Level3=None, Level4=None, Level5=None)
+#
+# This hand would be (2, 5, 4, 3, 2, 2, 2, 4) in a five-Deck
+# context though.
 #
 # The :func for hand_evaluation should work on:
 #    - A list of one or more cards
