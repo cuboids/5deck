@@ -14,6 +14,8 @@ Opening hand chart:
 Each deck has four cards per rank. In terms of level,
 we can sort them Top, Upper, Lower, Bottom.
 
+For a given deck, we could make the following charts:
+
 # # # # # # # # # # #
 # Deck level: 6     #
 # Best hand:        #
