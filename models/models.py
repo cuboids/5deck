@@ -235,24 +235,3 @@ class Rank(IntEnum):
 class Hand:
   """ Hands with one or more playing cards. """
   pass
-
-
-@lru_cache
-def hand_evaluation(hand: Hand) -> HandEvaluation:
-  """ Hand evaluation. """
-  
-  if hand.fivedeck and hand.shortdeck:
-    raise ValueError("Fivedeck shortdeck not supported.")
-  if hand.fivedeck:
-    return hand_evaluation_fivedeck(hand: Hand)
-  if hand.shortdeck:
-    return hand_evaluation_shortdeck(hand: Hand)
-  ...
-
-@lru_cache
-def hand_evaluation_fivedeck(hand: Hand):
-  ...
-
-@lru_cache
-def hand_evaluation_shortdeck(hand: Hand):
-  ...
