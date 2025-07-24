@@ -130,31 +130,22 @@
 
 :class HandStrength  # both verbal (a pair of aces with K87 kicker) and numerical
 
-:class HandLevel
-
-:class HandTier
-
-:class HandCategory
-
-:class HandGroup1
-
-:class HandGroup2
-
-:class HandGroup3
-
-:class HandGroup4
-
-:class HandGroup5
-
-:class HandLevelGroup1
-
-:class HandLevelGroup2
-
-:class HandLevelGroup3
-
-:class HandLevelGroup4
-
-:class HandLevelGroup5
+:attr  level
+:attr  tier
+:attr  category
+:attr  group1
+:attr  group2
+:attr  group3
+:attr  group4
+:attr  group5
+:attr  lgroup1
+:attr  lgroup2
+:attr  lgroup3
+:attr  lgroup4
+:attr  lgroup5
+:attr  hand_strength_tup  # named tuple (with number values)
+:attr  hand_strength_num
+:attr  hand_strength   # named tuple (with textual values)
 
 :func distribute_pot
 
