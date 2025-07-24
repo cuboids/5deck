@@ -2,6 +2,7 @@
 
 Here we try to answer questions like:
 
+- How common is each level card?
 - Visualize the distribution of deck levels?
 - Visualize the distribution of board levels?
 - Visualize the distribution of NLH hand levels?
