@@ -99,7 +99,28 @@
 #    - Groups = [Ace, King, 9, 7, deuce]
 #    - Level Groups = [3, 2, 2, 4, 2]
 #
-# Hand evaluation should work on:
+# These are together represented in a named tuple, e.g.
+#
+# (2, 1, 1, 14, 13, 9, 7, 2, 3, 2, 2, 4, 5) = 
+# (Level=2, Tier=1, Cat=1, Group1=14, Group2=13, Group3=9,
+#  Group4=7, Group5=2, LGroup1=3, LGroup2=2, LGroup3=2,
+#  LGroup4=4, LGroup5=5)
+#
+# If a Group or LGroup does not apply, it is None.
+#
+# For example: As(3) Ks(2), Qs(2), Ts(4), Js(2) has
+#    - Level = 2
+#    - Tier = Diamond (5/5)
+#    - Category = Royal Flush (4/5)
+#    - Groups = None
+#    - Level Groups = None
+#
+# (2, 5, 4) = 
+# (Level=2, Tier=5, Cat=4, Group1=None, Group2=None,
+#  Group3=None, Group4=None, Group5=None, LGroup1=None,
+#  LGroup2=None, LGroup3=None, LGroup4=None, LGroup5=None)
+#
+# The :func for hand_evaluation should work on:
 #    - A list of one or more cards
 #    - A board + hand
 # but not on:
