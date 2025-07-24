@@ -233,51 +233,52 @@ LEVELS: list[None | str] = [None, None] + [
 
 class Tier(IntEnum):
     """ Tiers of Hands """
-    BRONZE = 10
-    SILVER = 20
-    GOLD = 30
-    PLATINUM = 40
-    DIAMOND = 50
+    BRONZE = 100
+    SILVER = 200
+    GOLD = 300
+    PLATINUM = 400
+    DIAMOND = 500
 
 
 class Category(IntEnum):
     """ Category of Hands """
 
     # Bronze
-    HIGH_CARD = 11
-    ONE_PAIR = 12
-    TWO_PAIR = 13
-    SUITED_PAIR = 14
-    SEMI_SUITED_TWO_PAIR = 15
+    HIGH_CARD = 110
+    ONE_PAIR = 120
+    TWO_PAIR = 130
+    SUITED_PAIR = 140
+    SEMI_SUITED_TWO_PAIR = 150
 
     # Silver
-    THREE_OF_A_KIND = 21
-    FULL_HOUSE = 22
-    STRAIGHT = 23
-    FLUSH = 24
-    FLUSHED_PAIR = 25
+    THREE_OF_A_KIND = 210
+    STRAIGHT = 220
+    FULL_HOUSE_5D = 230
+    FULL_HOUSE_SD = 230
+    FLUSH = 240
+    FULL_HOUSE = 245  # A full house in 1deck poker
+    FLUSHED_PAIR = 250
 
     # Gold
-    SUITED_TWO_PAIR = 31
-    VILLA = 32
-    _1DECK_FULL_HOUSE = 32  # A full house in 1deck poker
-    FOUR_OF_A_KIND = 33
-    FLUSHED_TWO_PAIR = 34
-    SUITED_TRIPS = 35
+    SUITED_TWO_PAIR = 310
+    VILLA = 320
+    FOUR_OF_A_KIND = 330
+    FLUSHED_TWO_PAIR = 340
+    SUITED_TRIPS = 350
 
     # Platinum
-    MANSION = 41
-    FLUSHED_TRIPS = 42
-    CASTLE = 43
-    FIVE_OF_A_KIND = 44
-    STRAIGHT_FLUSH = 45
+    MANSION = 410
+    FLUSHED_TRIPS = 420
+    CASTLE = 430
+    FIVE_OF_A_KIND = 440
+    STRAIGHT_FLUSH = 450
 
     # Diamond
-    ROYAL_PALACE = 51
-    ROYAL_GUARD = 52
-    ROYAL_QUADS = 53
-    ROYAL_FLUSH = 54
-    ROYAL_QUINTET = 55
+    ROYAL_PALACE = 510
+    ROYAL_GUARD = 520
+    ROYAL_QUADS = 530
+    ROYAL_FLUSH = 540
+    ROYAL_QUINTET = 550
 
 
 class Rank(IntEnum):
@@ -545,7 +546,7 @@ class StdDeck(BaseDeck):
         ])
 
 
-class ShortDeck(BaseDeck):  # a short deck with 36 cards (6-Ace)
+class ShortDeck(BaseDeck):
 
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
@@ -579,12 +580,12 @@ class BaseHand(HandABC):
         return f"Hand({", ".join(str(self.cards[i]) for i in range(len(self.cards)))}"
 
 
-class OmahaHand(BaseHand):  # a hand with four playing cards, of which two need to be used
+class OmahaHand(BaseHand):
     def __init__(self, deck: BaseDeck) -> None:
         super().__init__(deck.deal(4), deck.deck_id)
 
 
-class HoldEmHand(BaseHand):  # a hand with two playing cards
+class HoldEmHand(BaseHand):
     def __init__(self, deck: BaseDeck) -> None:
         super().__init__(deck.deal(2), deck.deck_id)
 
@@ -1001,13 +1002,24 @@ class BaseHandStrengthEvaluator(HandStrengthEvaluator):
 
 
 def main():
-    l = LevelDeck()
-    b = StdBoard(l)
-    b.run_it_once()
-    print(b.cards)
-    bhse = BaseHandStrengthEvaluator()
-    hs = bhse.evaluate_hand(b.cards)
-    print(hs)
+    out = set()
+    strengths = set()
+    for _ in range(100_000):
+        l = LevelDeck()
+        for __ in range(10):
+            b = StdBoard(l)
+            b.run_it_once()
+            bhse = BaseHandStrengthEvaluator()
+            strength = bhse.evaluate_hand(b.cards)
+            if strength not in strengths:
+                strengths.add(strength)
+                out.add((str(b.cards), strength))
+
+    hs = sorted(out, key=lambda hs: tuple(h for h in hs[1] if h is not None))
+    for h in hs:
+        print(h[1])
+        print(h[0])
+        print()
 
 
 if __name__ == "__main__":
