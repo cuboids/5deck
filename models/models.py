@@ -102,10 +102,10 @@
 #
 # These are together represented in a named tuple, e.g.
 #
-# (2, 1, 1, 14, 13, 9, 7, 2, 3, 2, 2, 4, 5) = 
+# (2, 1, 1, 14, 13, 9, 7, 2, 3, 2, 2, 4, 2) = 
 # (Level=2, Tier=1, Cat=1, Group1=14, Group2=13, Group3=9,
 #  Group4=7, Group5=2, LGroup1=3, LGroup2=2, LGroup3=2,
-#  LGroup4=4, LGroup5=5)
+#  LGroup4=4, LGroup5=2)
 #
 # If a Group or LGroup does not apply, it is None.
 #
