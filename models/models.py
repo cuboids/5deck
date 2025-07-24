@@ -128,6 +128,8 @@
 #    - A board + multiple hands.
 # for that we use the :func distribute_pot
 
+:class HandEvaluation
+
 :class HandLevel
 
 :class HandTier
@@ -157,3 +159,18 @@
 :func distribute_pot
 
 """
+
+from lru_cache import lru_cache
+
+class Hand:
+  pass
+
+@lru_cache
+def hand_evaluation(hand: Hand, multideck: bool = False) -> HandEvaluation:
+  if multideck:
+    return hand_evaluation_multideck(hand: Hand)
+  ...
+
+@lru_cache
+def hand_evaluation_multideck(hand: Hand):
+  ...
