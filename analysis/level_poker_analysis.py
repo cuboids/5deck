@@ -43,7 +43,7 @@ we can sort them Top, Upper, Lower, Bottom.
 
 # # # # # # # # # # #
 # Hand: [AKo]       #
-# Levels 6432*5432  #
+# Levels: 6432*5432 #
 #                   #
 # tt% ut% lt% bt%   #
 # tu% uu% lu% bu%   #
