@@ -87,6 +87,7 @@
 
 # hand evaluation
 
+@lru_cache
 :func hand_evaluation
 
 # each hand has a level, tier, category, groups, and level groups,
