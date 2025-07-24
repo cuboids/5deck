@@ -217,9 +217,9 @@
 """
 
 from abc import ABC, abstractmethod
-from dataclass import dataclass
-from enum import IntEnum
-from lru_cache import lru_cache
+from dataclasses import dataclass
+from enum import Enum, IntEnum
+from random import random
 from uuid import uuid4
 
 
@@ -275,7 +275,6 @@ class Suit(Enum):
 
 class Level(IntEnum):
     """ Levels of playing cards. """
-  
     TWO = 2
     THREE = 3
     FOUR = 4
@@ -438,7 +437,7 @@ class ShortLevel(IntEnum):
 
 
 @dataclass(frozen=True)
-class BaseCard:
+class Card:
     rank: Rank
     suit: Suit
     level: Level | None = None
@@ -459,7 +458,7 @@ class DeckABC(ABC):
 
 class BaseDeck(DeckABC):
 
-    def __init__(self, cards: list[BaseCard]) -> None:
+    def __init__(self, cards: list[Card]) -> None:
         self.cards = cards
 
     def shuffle(self) -> None:
@@ -468,7 +467,7 @@ class BaseDeck(DeckABC):
     def deal(self, n: int) -> list[Card]:
         return [self.cards.pop() for _ in range(n)]
 
-    def __len__() -> int:
+    def __len__(self) -> int:
         return len(self.cards)
 
 
@@ -477,23 +476,25 @@ class FiveDeck(BaseDeck):
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
         super().__init__([
-            BaseCard(r, s, _id) for _ in range(5) for r in Rank for s in Suit
+            Card(r, s, _id) for _ in range(5) for r in Rank for s in Suit
         ])                
 
-class StdDeck(BaseDeck)
+
+class StdDeck(BaseDeck):
 
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
         super().__init__([
-            BaseCard(r, s, _id) for r in Rank for s in Suit
+            Card(r, s, _id) for r in Rank for s in Suit
         ])
 
-class ShortDeck(BaseDeck)  # a short deck with 36 cards (6-Ace)
+
+class ShortDeck(BaseDeck):  # a short deck with 36 cards (6-Ace)
 
     def __init__(self) -> None:
         self.deck_id = _id = uuid4()
         super().__init__([
-            BaseCard(r, s, _id) for r in Rank for s in Suit
+            Card(r, s, _id) for r in Rank for s in Suit
         ])
 
 class Hand:
