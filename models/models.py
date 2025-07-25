@@ -575,6 +575,40 @@ class ShortDeck(BaseDeck):
         ])
 
 
+class _LevelDeck:
+    """High-performance deck of _Card with levels assigned by LEVEL_WEIGHTS."""
+    
+    def __init__(self) -> None:
+        self._cards = self._generate_shuffled_deck()
+        self._index = 0  # For fast pop without removing from list
+
+    def _generate_shuffled_deck(self) -> list[_Card]:
+        # Precompute all 52 rank-suit pairs
+        base_cards = [(r, s) for r in range(13) for s in range(4)]
+        
+        # Sample 52 levels using the global weights
+        levels = random.choices(range(13), weights=LEVEL_WEIGHTS, k=52)
+        
+        # Create all cards (zip is faster and cleaner than enumerate)
+        cards = [_Card(r, s, lvl) for (r, s), lvl in zip(base_cards, levels)]
+        
+        random.shuffle(cards)
+        return cards
+
+    def shuffle(self) -> None:
+        random.shuffle(self._cards)
+        self._index = 0
+
+    def deal(self, n: int) -> list[_Card]:
+        # Avoid repeated pop() calls, just slice
+        i = self._index
+        self._index += n
+        return self._cards[i:i + n]
+
+    def __len__(self) -> int:
+        return len(self._cards) - self._index
+
+
 class LevelDeck(BaseDeck):
 
     def __init__(self) -> None:
