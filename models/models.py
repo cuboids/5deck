@@ -214,6 +214,10 @@
 
 :class LevelRuleSet(BaseRuleSet)
 
+# performance
+
+We will add highly performant versions of critical classes FooBar as _FooBar..
+
 """
 
 from abc import ABC, abstractmethod
@@ -489,6 +493,13 @@ class ShortLevel(IntEnum):
 
     def __str__(self):
         return str(self.value)
+
+
+@dataclass(frozen=True, slots=True)
+class _Card:
+    rank: int
+    suit: int
+    level: int
 
 
 @dataclass(frozen=True)
